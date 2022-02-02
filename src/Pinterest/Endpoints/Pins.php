@@ -27,8 +27,7 @@ class Pins extends Endpoint {
     public function get($pin_id, array $data = [])
     {
         $response = $this->request->get(sprintf("pins/%s/", $pin_id), $data);
-        return $response;
-        //return new Pin($this->master, $response);
+        return new Pin($this->master, $response);
     }
 
     /**
@@ -43,8 +42,7 @@ class Pins extends Endpoint {
     public function fromBoard($board_id, array $data = [])
     {
         $response = $this->request->get(sprintf("boards/%s/pins/", $board_id), $data);
-        return $response;
-        //return new Collection($this->master, $response, "Pin");
+        return new Collection($this->master, $response, "Pin");
     }
 
     /**
@@ -55,19 +53,18 @@ class Pins extends Endpoint {
      * @throws \DirkGroenen\Pinterest\Exceptions\PinterestException
      * @return Pin
      */
-    public function create($data)
+    public function create(array $data)
     {
-        // if (array_key_exists("image", $data)) {
-        //     if (class_exists('\CURLFile')) {
-        //         $data["image"] = new \CURLFile($data['image']);
-        //     } else {
-        //         $data["image"] = '@' . $data['image'];
-        //     }
-        // }
+        if (array_key_exists("image", $data)) {
+            if (class_exists('\CURLFile')) {
+                $data["image"] = new \CURLFile($data['image']);
+            } else {
+                $data["image"] = '@' . $data['image'];
+            }
+        }
 
         $response = $this->request->post("pins/", $data);
-        //return new Pin($this->master, $response);        
-        return $response;
+        return new Pin($this->master, $response);
     }
 
     /**
