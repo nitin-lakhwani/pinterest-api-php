@@ -21,7 +21,7 @@ class Request {
      *
      * @var string
      */
-    private $host = "https://api.pinterest.com/v1/";
+    private $host = "https://api.pinterest.com/v5/";
 
     /**
      * Access token
@@ -93,9 +93,9 @@ class Request {
      * @param  array    $parameters
      * @return Response
      */
-    public function post($endpoint, array $parameters = array())
+    public function post($endpoint, array|string $parameters = array(),$headers = array(),$formEncode=false)
     {
-        return $this->execute("POST", sprintf("%s%s", $this->host, $endpoint), $parameters);
+        return $this->execute("POST", sprintf("%s%s", $this->host, $endpoint), $parameters,$headers,$formEncode);
     }
 
     /**
@@ -166,20 +166,21 @@ class Request {
      * @throws CurlException
      * @throws PinterestException
      */
-    public function execute($method, $apiCall, array $parameters = array(), $headers = array())
+    public function execute($method, $apiCall, array|string $parameters = array(), $headers = array(),$formEncode=false)
     {
         // Check if the access token needs to be added
         if ($this->access_token != null) {
             $headers = array_merge($headers, array(
                 "Authorization: Bearer " . $this->access_token,
+                "Content-Type: application/json"
             ));
         }
 
         // Force cURL to not send Expect header to workaround bug with Akamai CDN not handling
         // this type of requests correctly
-        $headers = array_merge($headers, array(
-            "Expect:",
-        ));
+        // $headers = array_merge($headers, array(
+        //     "Expect:",
+        // ));
 
         // Setup CURL
         $ch = $this->curlbuilder->create();
@@ -196,12 +197,14 @@ class Request {
             CURLOPT_HEADER          => false,
             CURLINFO_HEADER_OUT     => true
         ));
-
+        if($formEncode){           
+            $parameters = http_build_query($parameters);
+             } 
         switch ($method) {
             case 'POST':
                 $ch->setOptions(array(
                     CURLOPT_CUSTOMREQUEST   => "POST",
-                    CURLOPT_POST            => count($parameters),
+                    //CURLOPT_POST            => count($parameters),
                     CURLOPT_POSTFIELDS      => $parameters
                 ));
 
