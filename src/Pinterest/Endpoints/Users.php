@@ -25,9 +25,8 @@ class Users extends Endpoint {
      */
     public function me(array $data = [])
     {
-        $response = $this->request->get("user_account", $data);
-        return $response;
-        //return new User($this->master, $response);
+        $response = $this->request->get("me/", $data);
+        return new User($this->master, $response);
     }
 
     /**
