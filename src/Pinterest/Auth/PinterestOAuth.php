@@ -47,7 +47,7 @@ class PinterestOAuth {
     /**
      * Pinterest's oauth endpoint
      */
-    const AUTH_HOST = "https://api.pinterest.com/oauth/";
+    const AUTH_HOST = "https://www.pinterest.com/oauth/";
 
     /**
      * Construct
@@ -76,7 +76,7 @@ class PinterestOAuth {
      * @param  string   $redirect_uri
      * @return string
      */
-    public function getLoginUrl($redirect_uri, $scopes = array("read_public"), $response_type = "code")
+    public function getLoginUrl($redirect_uri, $scopes = array("pins:read"), $response_type = "code")
     {
         $queryparams = array(
             "response_type"     => $response_type,
@@ -133,13 +133,17 @@ class PinterestOAuth {
         // Build data array
         $data = array(
             "grant_type"    => "authorization_code",
-            "client_id"     => $this->client_id,
-            "client_secret" => $this->client_secret,
-            "code"          => $code
+            "code"          => $code,
+            "redirect_uri" =>'http://localhost:8000/auth/callback/pinterest'
         );
-
+        $secretCode = base64_encode($this->client_id.":".$this->client_secret);
+        $headers = array(
+            'Authorization: Basic {'.$secretCode.'}',
+            'Content-Type: application/x-www-form-urlencoded'
+        );
         // Perform post request
-        $response = $this->request->post("oauth/token", $data);
+
+        $response = $this->request->post("oauth/token", $data,$headers,true);//sending form encode true
 
         return $response;
     }
